@@ -8,3 +8,10 @@ dim(training)
 
 set.seed(12345)
 modelFit <- train(type ~.,data = training, method='glm')
+modelFit
+modelFit$finalModel
+
+predictions <- predict(modelFit, newdata=testing)
+predictions
+
+confusionMatrix(predictions,testing$type)
