@@ -136,3 +136,41 @@ trainCapAveS <- predict(preObj, training[,-58])$capitalAve
 par(mfrow=c(1,2));hist(trainCapAveS);qqnorm(trainCapAveS)
 
 #Standardizing Imputing data
+set.seed(12352)
+training$capAve <- training$capitalAve
+selectNA <- rbinom(dim(training)[1],size = 1,prob = 0.05)==1
+training$capAve[selectNA] <- NA
+
+preObj <- preProcess(training[,-58],method='knnImpute')
+capAve <- predict(preObj,training[,-58])$capAve
+
+capAveTruth <- training$capitalAve
+capAveTruth <- (capAveTruth - mean(capAveTruth))/sd(capAveTruth)
+
+quantile(capAve-capAveTruth)
+quantile((capAve - capAveTruth)[selectNA])
+quantile((capAve - capAveTruth)[!selectNA])
+
+#Covariate creation
+spam$capitalAveSq <- spam$capitalAve^2
+
+inTrain <- createDataPartition(y=Wage$wage, p=0.7, list=FALSE)
+training <- Wage[inTrain,]; testing <- Wage[-inTrain,]
+
+table(training$jobclass)
+dummies <- dummyVars(wage ~ jobclass, data = training)
+head(predict(dummies,newdata=training))
+#Near Zero Values
+nsv <- nearZeroVar(training, saveMetrics = TRUE)
+nsv
+#Spline basis
+library(splines)
+bsBasis <- bs(training$age, df=3)
+bsBasis
+#Fitting curves with splines
+lm1 <- lm(wage ~ bsBasis, data = training)
+plot(training$age, training$wage, pch=19, cex=0.5)
+points(training$age, predict(lm1,newdata=training), col='red', pch=19, cex=0.5)
+#Splines on the test set
+predict(bsBasis, age=testing$age)
+
