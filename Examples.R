@@ -134,7 +134,7 @@ modelFit
 preObj <- preProcess(training[,-58],method=c('BoxCox'))
 trainCapAveS <- predict(preObj, training[,-58])$capitalAve
 par(mfrow=c(1,2));hist(trainCapAveS);qqnorm(trainCapAveS)
-
+par(1)
 #Standardizing Imputing data
 set.seed(12352)
 training$capAve <- training$capitalAve
@@ -174,3 +174,4 @@ points(training$age, predict(lm1,newdata=training), col='red', pch=19, cex=0.5)
 #Splines on the test set
 predict(bsBasis, age=testing$age)
 
+#Preprocessing with Principal Components Analysis (PCA)
