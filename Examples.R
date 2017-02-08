@@ -164,6 +164,7 @@ head(predict(dummies,newdata=training))
 nsv <- nearZeroVar(training, saveMetrics = TRUE)
 nsv
 #Spline basis
+par(0)
 library(splines)
 bsBasis <- bs(training$age, df=3)
 bsBasis
@@ -175,3 +176,43 @@ points(training$age, predict(lm1,newdata=training), col='red', pch=19, cex=0.5)
 predict(bsBasis, age=testing$age)
 
 #Preprocessing with Principal Components Analysis (PCA)
+#Correlated predictors
+inTrain <- createDataPartition(y=spam$type, p=0.75, list = FALSE)
+training <- spam[inTrain,];testing[-inTrain,]
+
+M <- abs(cor(training[,-58]))
+diag(M) <- 0
+which(M > 0.8, arr.ind = T)
+names(spam)[c(32,34)]
+plot(spam[,32],spam[,34])
+
+#rotate plot to find combination with most information
+X <- 0.71 * training$num415 + 0.71 * training$num857
+Y <- 0.71 * training$num415 - 0.71 * training$num857
+plot(X,Y)
+
+#Principal Components (prcomp)
+smallSpam <- spam[,c(34,32)]
+prComp <- prcomp(smallSpam)
+plot(prComp$x[,1],prComp$x[,2])
+prComp$rotation
+
+
+typeColor <- ((spam$type=='spam')*1+1)
+prComp <- prcomp(log10(spam[,-58]+1))
+plot(prComp$x[,1],prComp$x[,2],col=typeColor,xlab = 'PC1',ylab='PC2')
+
+#PCA with caret
+preProc <- preProcess(log10(spam[,-58]+1),method = 'pca', pcaComp = 2)
+spamPC <- predict(preProc,log10(spam[,-58]+1))
+plot(spamPC[,1],spamPC[,2],col=spam$type)
+
+preProc <- preProcess(log10(training[,-58]+1),method = 'pca', pcaComp = 2)
+trainPC <- predict(preProc,log10(training[,-58]+1))
+modelFit <- train(x=trainPC,y=training$type,method='glm')
+
+testPC <- predict(preProc, log10(testing[,-58]+1))
+confusionMatrix(testing$type,predict(modelFit,testPC))
+
+modelFit <- train(x=training, y = training$type,method='glm', preProcess='pca')
+confusionMatrix(testing$type,predict(modelFit,testing))
