@@ -134,7 +134,7 @@ modelFit
 preObj <- preProcess(training[,-58],method=c('BoxCox'))
 trainCapAveS <- predict(preObj, training[,-58])$capitalAve
 par(mfrow=c(1,2));hist(trainCapAveS);qqnorm(trainCapAveS)
-par(1)
+par(mfrow=c(1,1))
 #Standardizing Imputing data
 set.seed(12352)
 training$capAve <- training$capitalAve
@@ -164,7 +164,7 @@ head(predict(dummies,newdata=training))
 nsv <- nearZeroVar(training, saveMetrics = TRUE)
 nsv
 #Spline basis
-par(0)
+
 library(splines)
 bsBasis <- bs(training$age, df=3)
 bsBasis
