@@ -93,7 +93,6 @@ prop.table(t1,1)
 
 #Density plots
 qplot(wage,color=education,data=training,geom='density')
-qplot()
 
 #Pre-processing   *******************************
 inTrain <- createDataPartition(y=spam$type, p=0.75, list = FALSE)
