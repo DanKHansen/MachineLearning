@@ -93,7 +93,6 @@ prop.table(t1,1)
 
 #Density plots
 qplot(wage,color=education,data=training,geom='density')
-qplot()
 
 #Pre-processing   *******************************
 inTrain <- createDataPartition(y=spam$type, p=0.75, list = FALSE)
@@ -217,3 +216,6 @@ confusionMatrix(testing$type,predict(modelFit,testPC))
 
 modelFit <- train(x=training, y = training$type,method='glm', preProcess='pca')
 confusionMatrix(testing$type,predict(modelFit,testing))
+
+#Predicting with regression
+
