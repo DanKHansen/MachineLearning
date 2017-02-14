@@ -259,3 +259,5 @@ matlines(testFaith$waiting[ord],pred1[ord,],type='l',col=c(1,2,2),lty=c(1,1,1),l
 #Doing it all with caret
 modFit <- train(eruptions~waiting,data=trainFaith,method='lm')
 summary(modFit$finalModel)
+
+#Predicting with regression, multiple covariates
