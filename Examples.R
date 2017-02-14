@@ -7,7 +7,7 @@ testing <- spam[-inTrain,]
 
 dim(training)
 
-set.seed(12345)
+set.seed(32343)
 modelFit <- train(type ~.,data = training, method='glm')
 modelFit
 modelFit$finalModel
@@ -19,28 +19,28 @@ confusionMatrix(predictions,testing$type)
 
 #Data Slicing **********************************
 #K-fold - Return train
-set.seed(12346)
+set.seed(32323)
 folds <- createFolds(y=spam$type, k=10, list=TRUE, returnTrain = TRUE)
 sapply(folds,length)
 
 folds[[1]][1:10]
 
 #Return test
-set.seed(12347)
+set.seed(32323)
 folds <- createFolds(y=spam$type, k=10, list=TRUE, returnTrain = FALSE)
 sapply(folds,length)
 
 folds[[1]][1:10]
 
 #Resampling - bootstrapping
-set.seed(12348)
+set.seed(32323)
 folds <- createResample(y=spam$type, times = 10, list = TRUE)
 sapply(folds,length)
 
 folds[[1]][1:10]
 
 #Time slices
-set.seed(12349)
+set.seed(32323)
 tme <- 1:1000
 folds <- createTimeSlices(y=tme, initialWindow = 20, horizon = 10)
 names(folds)
@@ -49,10 +49,10 @@ folds$test[[1]]
 
 #Training options **********************************
 args(trainControl)
-set.seed(12350)
+set.seed(1235)
 modelFit2 <- train(type~.,data = training, method = 'glm')
 modelFit2
-set.seed(12350) #same seed for reproducing results
+set.seed(1235) #same seed for reproducing results
 modelFit3 <- train(type~.,data = training, method = 'glm')
 modelFit3
 
@@ -126,7 +126,7 @@ mean(testCapAveS)
 sd(testCapAveS)
 
 #Standardizing preprocess argument
-set.seed(12351)
+set.seed(32343)
 modelFit <- train(type ~.,data=training, preProcess=c('center','scale'),method='glm')
 modelFit
 
@@ -135,7 +135,7 @@ trainCapAveS <- predict(preObj, training[,-58])$capitalAve
 par(mfrow=c(1,2));hist(trainCapAveS);qqnorm(trainCapAveS)
 par(mfrow=c(1,1))
 #Standardizing Imputing data
-set.seed(12352)
+set.seed(13343)
 training$capAve <- training$capitalAve
 selectNA <- rbinom(dim(training)[1],size = 1,prob = 0.05)==1
 training$capAve[selectNA] <- NA
@@ -219,3 +219,43 @@ confusionMatrix(testing$type,predict(modelFit,testing))
 
 #Predicting with regression
 
+data("faithful"); set.seed(333)
+inTrain <- createDataPartition(y=faithful$waiting,p=0.5, list = FALSE)
+trainFaith <- faithful[inTrain,];testFaith <- faithful[-inTrain,]
+head(trainFaith)
+
+plot(trainFaith$waiting,trainFaith$eruptions,pch=19,col='blue',xlab = 'Waiting',ylab="Duration")
+
+lm1 <- lm(eruptions ~ waiting,data=trainFaith)
+summary(lm1)
+lines(trainFaith$waiting,lm1$fitted,lwd=3)
+
+#Predict a new value
+coef(lm1)[1] + coef(lm1)[2]*80
+newdata <- data.frame(waiting=80)
+predict(lm1,newdata)
+
+#Plot predictions train and test
+par(mfrow=c(1,2))
+plot(trainFaith$waiting,trainFaith$eruptions,pch=19,col='blue',xlab = 'Waiting',ylab="Duration")
+lines(trainFaith$waiting,predict(lm1),lwd=3)
+
+plot(testFaith$waiting,testFaith$eruptions,pch=19,col='blue',xlab = 'Waiting',ylab="Duration")
+lines(testFaith$waiting,predict(lm1,newdata=testFaith),lwd=3)
+par(mfrow=c(1,1))
+
+#Get training set/test set errors
+#calculate RMSE on training
+sqrt(sum((lm1$fitted-trainFaith$eruptions)^2))
+#calculate RMSE on training
+sqrt(sum((predict(lm1,newdata=testFaith)-testFaith$eruptions)^2))
+
+#Prediction intervals
+pred1 <- predict(lm1,newdata=testFaith,interval='prediction')
+ord <- order(testFaith$waiting)
+plot(testFaith$waiting,testFaith$eruptions,pch=19,col='blue')
+matlines(testFaith$waiting[ord],pred1[ord,],type='l',col=c(1,2,2),lty=c(1,1,1),lwd=3)
+
+#Doing it all with caret
+modFit <- train(eruptions~waiting,data=trainFaith,method='lm')
+summary(modFit$finalModel)
