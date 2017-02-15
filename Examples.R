@@ -261,3 +261,29 @@ modFit <- train(eruptions~waiting,data=trainFaith,method='lm')
 summary(modFit$finalModel)
 
 #Predicting with regression, multiple covariates
+library(ISLR);library(ggplot2);library(caret)
+data("Wage");mywage <- subset(Wage,select = -c(logwage))
+summary(Wage)
+inTrain <- createDataPartition(y=mywage$wage,p=0.7,list = FALSE)
+training <- mywage[inTrain,];testing <- mywage[-inTrain,]
+dim(training);dim(testing)
+
+featurePlot(x=training[,c('age','education','jobclass')],y=training$wage,plot='pairs')
+qplot(age,wage,data=training)
+qplot(age,wage,color=jobclass,data=training)
+qplot(age,wage,color=education,data=training)
+
+modFit <- train(wage ~ +age + jobclass + education, method='lm',data=training)
+finMod <- modFit$finalModel
+print(modFit)
+
+plot(finMod,1,pch=19,cex=0.5,col='#00000010')
+qplot(finMod$fitted.values,finMod$residuals,color=race,data=training)
+plot(finMod$residuals,pch=19)
+
+pred <- predict(modFit,testing)
+qplot(wage,pred,color=year,data=testing)
+
+modFitAll <- train(wage ~ .,data=training,method='lm')
+pred <- predict(modFitAll, testing)
+qplot(wage,pred,data=testing)
