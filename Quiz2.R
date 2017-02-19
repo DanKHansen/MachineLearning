@@ -117,6 +117,7 @@ NotPCFit <- train(x=trainSmall,y=trainSmall$training.diagnosis, method="glm")
 
 PCTestPredict <- predict(PCFit,newdata=testPC)
 confusionMatrix(PCTestPredict,testSmall$testing.diagnosis)
+
 NotPCTestPredict <- predict(NotPCFit,newdata=testSmall)
 confusionMatrix(NotPCTestPredict,testSmall$testing.diagnosis)
 
