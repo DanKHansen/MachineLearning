@@ -82,9 +82,9 @@ inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
 training = adData[ inTrain,]
 testing = adData[-inTrain,]
 
-preProc <- preProcess(training[,startsWith(names(training),'IL')],method="pca",thres=.9)
+preObj <- preProcess(training[,startsWith(names(training),'IL')],method="pca",thres=.9)
 #answer
-preProc #(9)
+preObj #(9)
 
 #QUESTION5
 library(caret)
@@ -96,29 +96,20 @@ inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
 training = adData[ inTrain,]
 testing = adData[-inTrain,]
 
-# trainSubSet <- data.frame(training[,startsWith(names(training),'IL')],training$diagnosis)
-# preProc <- preProcess(trainSubSet[-13],method="pca",thres=.8)
-# trainPC <- predict(preProc,trainSubSet[-13])
-# 
-# PCFit <- train(trainSubSet$training.diagnosis~.,data=trainPC,method="glm")
-# NotPCFit <- train(trainSmall$training.diagnosis~.,data=trainSmall,method="glm")
 
+SubSetTrain <- data.frame(training[,startsWith(names(training),'IL')],training[1])
+SubSetTest <- data.frame(testing[,startsWith(names(testing),'IL')],testing[1])
 
-trainSmall <- data.frame(training[,grep('^IL',names(training))],training$diagnosis)
-testSmall <- data.frame(training[,grep('^IL',names(training))],training$diagnosis)
+preObj <- preProcess(SubSetTrain[-13],method="pca",thres=.8)
+trainPC <- predict(preObj,SubSetTrain[-13])
+testPC <- predict(preObj,SubSetTest[-13])
 
-preProc <- preProcess(trainSmall[-13],method="pca",thres=.8)
+modPC <- train(x=trainPC,y=SubSetTrain$diagnosis,method='glm')
+modNotPC <- train(diagnosis~.,data=SubSetTrain,method="glm")
 
-trainPC <- predict(preProc,trainSmall[-13])
-testPC <-predict(preProc,testSmall[-13])
+PCTestPredict <- predict(modPC,newdata=testPC)
+confusionMatrix(PCTestPredict,SubSetTest$diagnosis)
 
-PCFit <- train(x=trainPC,y=trainSmall$training.diagnosis, method = "glm")
-NotPCFit <- train(x=trainSmall,y=trainSmall$training.diagnosis, method="glm")
-
-PCTestPredict <- predict(PCFit,newdata=testPC)
-confusionMatrix(PCTestPredict,testSmall$testing.diagnosis)
-
-NotPCTestPredict <- predict(NotPCFit,newdata=testSmall)
-confusionMatrix(NotPCTestPredict,testSmall$testing.diagnosis)
-
+NotPCTestPredict <- predict(modNotPC,newdata=SubSetTest)
+confusionMatrix(NotPCTestPredict,SubSetTest$diagnosis)
 
