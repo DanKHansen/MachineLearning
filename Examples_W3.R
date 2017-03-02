@@ -88,3 +88,5 @@ table(plda,pnb)
 
 equalPredictions = (plda==pnb)
 qplot(Petal.Width, Sepal.Width, color=equalPredictions, data= testing)
+
+#test
