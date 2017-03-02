@@ -71,4 +71,20 @@ print(modFit)
 
 qplot(predict(modFit, testing), wage, data=testing)
 
-#Model Based Prediction
+#Model Based Prediction (Bayes)
+data("iris");library(ggplot2)
+names(iris)
+table(iris$Species)
+
+inTrain <- createDataPartition(y=iris$Species,p=0.7,list=FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+dim(training);dim(testing)
+
+modlda = train(Species~.,data=training, method='lda')
+modnb = train(Species~.,data=training, method='nb')
+plda = predict(modlda, testing); pnb <- predict(modnb,testing)
+table(plda,pnb)
+
+equalPredictions = (plda==pnb)
+qplot(Petal.Width, Sepal.Width, color=equalPredictions, data= testing)
