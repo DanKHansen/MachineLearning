@@ -63,3 +63,13 @@ fit <- train(CompressiveStrength ~.,method='lasso', data = training)
 plot.enet(fit$finalModel,xvar = 'penalty', use.color = T)
 
 #Question 4
+library(lubridate) #for year() function below
+library(forecast)
+dat = read.csv("gaData.csv")
+training = dat[year(dat$date)<2012,]
+testing = dat[year(dat$date)>2011,]
+tstrain = ts(training$visitsTumblr)
+bat1 <- bats(tstrain)
+fcast1 <- forecast(bat1,level = 95,h=nrow(testing))
+tab1 <- table((testing$visitsTumblr>fcast1$lower) & (testing$visitsTumblr<fcast1$upper))
+round(tab1[[2]]/nrow(testing) * 100,0)
