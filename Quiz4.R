@@ -40,14 +40,14 @@ predRF <- predict(fitRF,testing)
 predGBM <- predict(fitGBM,testing)
 predLDA <- predict(fitLDA,testing)
 
-RF_accuracy <- confusionMatrix(predRF,testing$diagnosis)$overall[1]
-GBM_accuracy <- confusionMatrix(predGBM,testing$diagnosis)$overall[1]
-LDA_accuracy <- confusionMatrix(predLDA,testing$diagnosis)$overall[1]
+accuracy_RF <- confusionMatrix(predRF,testing$diagnosis)$overall[1]
+accuracy_GBM <- confusionMatrix(predGBM,testing$diagnosis)$overall[1]
+accuracy_LDA <- confusionMatrix(predLDA,testing$diagnosis)$overall[1]
 
 combDF <- data.frame(predRF,predGBM,predLDA, diagnosis=testing$diagnosis)
 fitCOMB <- train(diagnosis~.,method='rf',data=combDF)
 predCOMB <- predict(fitCOMB,combDF)
-COMB_accuracy <- confusionMatrix(predCOMB,testing$diagnosis)$overall[1]
+accuracy_COMB <- confusionMatrix(predCOMB,testing$diagnosis)$overall[1]
 
 #Question 3
 set.seed(3523)
