@@ -73,3 +73,17 @@ bat1 <- bats(tstrain)
 fcast1 <- forecast(bat1,level = 95,h=nrow(testing))
 tab1 <- table((testing$visitsTumblr>fcast1$lower) & (testing$visitsTumblr<fcast1$upper))
 round(tab1[[2]]/nrow(testing) * 100,0)
+
+#Question 5
+set.seed(3523)
+library(AppliedPredictiveModeling)
+library(caret)
+data("concrete")
+inTrain = createDataPartition(concrete$CompressiveStrength, p=3/4)[[1]]
+training = concrete[inTrain,]
+testing = concrete[-inTrain,]
+set.seed(325)
+library(e1071)
+svm1  <- svm(CompressiveStrength ~., data = training)
+pred1 <- predict(svm1,testing)
+round(RMSE(pred1,testing$CompressiveStrength),2)
