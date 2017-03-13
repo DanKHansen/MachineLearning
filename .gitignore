@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+pml-training.csv
+pml-testing.csv
