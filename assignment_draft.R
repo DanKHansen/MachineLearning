@@ -1,2 +1,74 @@
+#Supervised Learning, Classification problem.
+#Typical models could be: 
+# Decision Trees
+# Ensembles 
+##  Bagging (usually applied to DT), 
+##  Boosting (combine and weight variables), 
+##  Random Forest (beware of overfitting)
+# KNN
+# Linear Regression
+# Naive Bayes
+# NN
+# Logistic Regression
+# Perceptron
+# Relevance Vector Machine (RVM)
+# Support Vector Mashine (SVM)
+
+#Original datasets:
+
+# http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+# http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+#Loading data
 testing <- read.csv('pml-testing.csv',na.strings = c('','NA','#DIV/0!'))
 training <- read.csv('pml-training.csv',na.strings = c('','NA','#DIV/0!'))
+
+#Loading library
+library(caret)
+
+#Cleaning data
+#removing variables with close to zero variance (using caret package)
+#these variables will have close to no influence on the prediction anyway
+nzv_train <- nearZeroVar(training,saveMetrics = T)
+nzv_test <- nearZeroVar(testing,saveMetrics = T)
+
+myTraining <- training[,nzv_train$nzv == F]
+myTesting <- testing[,nzv_test$nzv == F]
+
+#only keep columns which do not only holds NA's
+#as they will have no influence on the prediction anyway
+tmp_train_names <- colnames(myTraining)[colSums(is.na(myTraining))==0]
+tmp_test_names <- colnames(myTesting)[colSums(is.na(myTesting))==0]
+
+myTraining <- myTraining[,tmp_train_names]
+myTesting <- myTesting[,tmp_test_names]
+
+#removing timestamps, X and usernames - not relevant for this excerzise
+myTraining <- myTraining[,-c(1:7)]
+myTesting <- myTesting[,-c(1:7)]
+
+#Now let's make some models :-)
+#I'll take the easy way, and let caret do the cross-validation and preprocessing
+#Starting of with a 'clean' Random Forest (takes forever to run)
+set.seed(223344)
+mod <- train(classe ~.,data=myTraining,method = 'rf')
+max(mod$results$Accuracy)
+#With crossvalidation
+# mod_CV <- train(classe ~.,data=myTraining,method = 'rf', 
+#                 trControl = trainControl(method = 'cv', number = 8))
+
+#With preprocessing  
+# mod_PP <- train(classe ~.,data=myTraining,method = 'rf', 
+#                 preProcess=c('center','scale'))
+
+#with both  
+# mod_CV_PP <- train(classe ~.,data=myTraining,method = 'rf', 
+#                    trControl = trainControl(method = 'cv', number = 8),
+#                    preProcess=c('center','scale'))
+
+#Prediction
+pred <- predict(mod,myTesting)
+
+myTesting <- cbind(myTesting, pred)
+#Quiz result
+myTesting[,52:53]
