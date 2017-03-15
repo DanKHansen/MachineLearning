@@ -84,3 +84,9 @@ pred_rf_cv_pp <- predict(mod_CV_PP,myTesting)
 mod_MN <- train(classe ~.,data=myTraining,method = 'multinom',
                    trControl = trainControl(method = 'cv', number = 8))
 accu_MN_cv <- round(max(mod_CV_PP$results$Accuracy)*100,2)
+pred_MN <- predict(mod_MN,myTesting)
+#with Bagged CART
+mod_BC <- train(classe ~.,data=myTraining,method = 'treebag',
+                trControl = trainControl(method = 'cv', number = 8))
+accu_BC <- round(max(mod_BC$results$Accuracy)*100,2)
+pred_BC <- predict(mod_BC,myTesting)
