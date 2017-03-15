@@ -52,23 +52,35 @@ myTesting <- myTesting[,-c(1:7)]
 #Starting of with a 'clean' Random Forest (takes forever to run)
 set.seed(223344)
 mod <- train(classe ~.,data=myTraining,method = 'rf')
-max(mod$results$Accuracy)
+accu_rf <- round(max(mod$results$Accuracy)*100,2)
+
 #With crossvalidation
-# mod_CV <- train(classe ~.,data=myTraining,method = 'rf', 
-#                 trControl = trainControl(method = 'cv', number = 8))
+mod_CV <- train(classe ~.,data=myTraining,method = 'rf', 
+                 trControl = trainControl(method = 'cv', number = 8))
+accu_cv <- round(max(mod_CV$results$Accuracy)*100,2)
 
 #With preprocessing  
-# mod_PP <- train(classe ~.,data=myTraining,method = 'rf', 
-#                 preProcess=c('center','scale'))
+mod_PP <- train(classe ~.,data=myTraining,method = 'rf', 
+                 preProcess=c('center','scale'))
+accu_pp <- round(max(mod_PP$results$Accuracy)*100,2)
 
 #with both  
-# mod_CV_PP <- train(classe ~.,data=myTraining,method = 'rf', 
-#                    trControl = trainControl(method = 'cv', number = 8),
-#                    preProcess=c('center','scale'))
+mod_CV_PP <- train(classe ~.,data=myTraining,method = 'rf',
+                   trControl = trainControl(method = 'cv', number = 8),
+                   preProcess=c('center','scale'))
+accu_cv_pp <- round(max(mod_CV_PP$results$Accuracy)*100,2)
 
-#Prediction
-pred <- predict(mod,myTesting)
+#Prediction (for use in Quiz)
+pred_rf <- predict(mod,myTesting)
+pred_cv <- predict(mod_CV,myTesting)
+pred_pp <- predict(mod_PP,myTesting)
+pred_rf_cv_pp <- predict(mod_CV_PP,myTesting)
 
-myTesting <- cbind(myTesting, pred)
-#Quiz result
-myTesting[,52:53]
+
+
+
+
+#with Logistic / multinomial Regression no preproc.  
+mod_MN <- train(classe ~.,data=myTraining,method = 'multinom',
+                   trControl = trainControl(method = 'cv', number = 8))
+accu_MN_cv <- round(max(mod_CV_PP$results$Accuracy)*100,2)
