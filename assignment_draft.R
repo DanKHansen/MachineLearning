@@ -51,6 +51,8 @@ myTesting <- myTesting[,-c(1:7)]
 #I'll take the easy way, and let caret do the cross-validation and preprocessing
 #Starting of with a 'clean' Random Forest (takes forever to run)
 set.seed(223344)
+library(doMC)
+registerDoMC(cores = 5)
 mod <- train(classe ~.,data=myTraining,method = 'rf')
 accu_rf <- round(max(mod$results$Accuracy)*100,2)
 
