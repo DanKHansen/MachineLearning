@@ -47,6 +47,14 @@ myTesting <- myTesting[,tmp_test_names]
 myTraining <- myTraining[,-c(1:7)]
 myTesting <- myTesting[,-c(1:7)]
 
+#XGBoost
+mod_xgb <- train(classe ~.,data=myTraining, method='xgbLinear')
+accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
+
+#elm
+mod_elm <- train(classe ~.,data=myTraining, method='elm')
+accu_elm <- round(max(mod_elm$results$Accuracy)*100,2)
+
 #Now let's make some models :-)
 #I'll take the easy way, and let caret do the cross-validation and preprocessing
 #Starting of with a 'clean' Random Forest (takes forever to run)
@@ -84,7 +92,7 @@ pred_rf_cv_pp <- predict(mod_CV_PP,myTesting)
 
 #with Logistic / multinomial Regression no preproc.  
 mod_MN <- train(classe ~.,data=myTraining,method = 'multinom',
-                   trControl = trainControl(method = 'cv', number = 8))
+                   trControl = trainControl(method = 'cv', number = 8), verbose = F)
 accu_MN_cv <- round(max(mod_CV_PP$results$Accuracy)*100,2)
 pred_MN <- predict(mod_MN,myTesting)
 #with Bagged CART
