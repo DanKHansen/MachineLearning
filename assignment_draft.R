@@ -51,6 +51,15 @@ myTesting <- myTesting[,-c(1:7)]
 mod_xgb <- train(classe ~.,data=myTraining, method='xgbLinear')
 accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
 
+#XGBTree
+mod_xgbt <- train(classe ~.,data=myTraining, method='xgbTree')
+accu_xgbt <- round(max(mod_xgbt$results$Accuracy)*100,2)
+
+#bglm
+mod_bglm <- train(classe ~.,data=myTraining, method='bayesglm')
+accu_bglm <- round(max(mod_bglm$results$Accuracy)*100,2)
+
+
 #elm
 mod_elm <- train(classe ~.,data=myTraining, method='elm')
 accu_elm <- round(max(mod_elm$results$Accuracy)*100,2)
