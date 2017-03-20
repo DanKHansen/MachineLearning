@@ -60,14 +60,14 @@ cfm_xgb <- confusionMatrix(mod_xgb)
 
 # Random Forest - out-of-the-box
 mod_rf <- train(x,y,data=myTraining,method = 'rf')
-accu_rf <- round(max(mod$results$Accuracy)*100,2)
+accu_rf <- round(max(mod_rf$results$Accuracy)*100,2)
 cfm_rf <- confusionMatrix(mod_rf)
 
 # Random Forest with both preprocessing and cross-validation  
 mod_rf_all <- train(x,y,data=myTraining,method = 'rf',
                    trControl = tc,
                    preProcess=c('center','scale'))
-accu_rf_all <- round(max(mod_CV_PP$results$Accuracy)*100,2)
+accu_rf_all <- round(max(mod_rf_all$results$Accuracy)*100,2)
 cfm_rf_all <- confusionMatrix(mod_rf_all)
 
 # Return to single processing
