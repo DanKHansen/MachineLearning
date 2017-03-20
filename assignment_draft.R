@@ -53,10 +53,16 @@ set.seed(223344)
 # config trainControl object
 tc <- trainControl(method = 'cv', number = 10, allowParallel = T)
 
-# Extended Gradient Boost - linear - out-of-the-box
+# Extended Gradient Boost - linear
 mod_xgb <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc)
 accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
 cfm_xgb <- confusionMatrix(mod_xgb)
+
+# Extended Gradient Boost - linear - Preproc
+mod_xgb_pp <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc,
+                 preProcess = c('center','scale'))
+accu_xgb_pp <- round(max(mod_xgb_pp$results$Accuracy)*100,2)
+cfm_xgb_pp <- confusionMatrix(mod_xgb_pp)
 
 # Random Forest - out-of-the-box
 mod_rf <- train(x,y,data=myTraining,method = 'rf')
@@ -75,6 +81,13 @@ stopCluster(cluster)
 registerDoSEQ()
 
 #Prediction (for use in Quiz)
-pred_xbg <- predict(mod_xgb,myTesting)
+pred_xgb <- predict(mod_xgb,myTesting)
 pred_rf <- predict(mod_rf,myTesting)
 pred_rf_all <- predict(mod_rf_all,myTesting)
+
+accuracies <- rbind(accu_rf,accu_rf_all,accu_xgb)
+View(accuracies)
+# All 3 predictions results in the same output, hence using this for validation
+# in the quiz, and resulting in a 100% score
+preds <- rbind(as.character(pred_xbg),as.character(pred_rf),as.character(pred_rf_all))
+View(preds)
