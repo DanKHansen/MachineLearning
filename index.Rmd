@@ -138,7 +138,7 @@ pred_rf_all <- predict(mod_rf_all,myTesting)
 ```
 
 Listing the predictions for comparison
-```{r predictions}
+```{r list_predictions}
 # All 4 predictions results in the same output, hence using this for validation
 # in the quiz, and resulting in a 100% score
 preds <- rbind(as.character(pred_xbg),as.character(pred_xbg_pp),
