@@ -45,7 +45,7 @@ myTraining <- myTraining[,-c(1:7)]
 myTesting <- myTesting[,-c(1:7)]
 
 # using the model-syntax has bad performance. hence using x/y syntax
-x <- myTraining[,-"classe"]
+x <- myTraining[,-52]
 y <- myTraining[,"classe"]
 
 set.seed(223344)

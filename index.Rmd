@@ -1,5 +1,5 @@
 ---
-title: "Practical ML Coursera"
+title: "Practical Machine Learning Coursera"
 author: "Dan Kjeldstrøm Hansen"
 date: "March 20, 2017"
 output: html_document
@@ -11,20 +11,139 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is the Coursera Practical Machine Learning course assignment.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+We are faced with a superviced learning, classification task.
+Given the data collected with wearables from 5 different test persons during different
+excerzises, and evaluated by a professional instructor. Each excesize is given a classification
+A to E according to the accuracy of the ecersize performed.
+The task is to see if it is possible to predict the classe (correctness of excesize) given the
+various data collected.
 
-```{r cars}
-summary(cars)
+The data is provided in two files, one for training and one for testing and can be found here:
+
+http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+We start off by loading the necessary libraries
+
+```{r libraries}
+library(caret)
+library(randomForest)
+library(xgboost)
+library(ggplot2)
+library(lattice)
+```
+As the processing is quite CPU-heavy we'll use parallel processing with the use of the
+parallel library, which runs on both LINUX and Windows.
+
+```{r prallel}
+library(parallel)
+library(doParallel)
+cluster <- makeCluster(detectCores()-1)
+registerDoParallel(cluster)
+```
+And the we load the datasets
+
+```{r datasets}
+testing <- read.csv('pml-testing.csv',na.strings = c('','NA','#DIV/0!'))
+training <- read.csv('pml-training.csv',na.strings = c('','NA','#DIV/0!'))
+```
+Cleaning out the dataset for use in our algorithms
+
+```{r clean}
+#removing variables with close to zero variance (using caret package)
+#these variables will have close to no influence on the prediction anyway
+nzv_train <- nearZeroVar(training,saveMetrics = T)
+nzv_test <- nearZeroVar(testing,saveMetrics = T)
+
+myTraining <- training[,nzv_train$nzv == F]
+myTesting <- testing[,nzv_test$nzv == F]
+
+#only keep columns which do not only holds NA's
+#as they will have no influence on the prediction anyway
+tmp_train_names <- colnames(myTraining)[colSums(is.na(myTraining))==0]
+tmp_test_names <- colnames(myTesting)[colSums(is.na(myTesting))==0]
+
+myTraining <- myTraining[,tmp_train_names]
+myTesting <- myTesting[,tmp_test_names]
+
+#removing timestamps, X and usernames - not relevant for this excerzise
+myTraining <- myTraining[,-c(1:7)]
+myTesting <- myTesting[,-c(1:7)]
+
+# using the model-syntax has bad performance. hence using x/y syntax
+x <- myTraining[,-52]
+y <- myTraining[,'classe']
+
+```
+To be able to replicate the resuls we set the seed:
+
+```{r seed}
+set.seed(223344)
 ```
 
-## Including Plots
+And now to the modelling
+First we configure the trainControl object:
 
-You can also embed plots, for example:
+```{r trainctrlcfg}
+tc <- trainControl(method = 'cv', number = 10, allowParallel = T)
+```
+And the we try 4 different models within the caret package
+We'll let caret take care of the cross-validation and preprocessing
+each chunk includes the model, the accuracy and a confusionmatrix
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r models}
+# Extended Gradient Boost - linear
+mod_xgb <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc)
+accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
+cfm_xgb <- confusionMatrix(mod_xgb)
+
+# Extended Gradient Boost - linear - Preproc
+mod_xgb_pp <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc,
+                 preProcess = c('center','scale'))
+accu_xgb_pp <- round(max(mod_xgb_pp$results$Accuracy)*100,2)
+cfm_xgb_pp <- confusionMatrix(mod_xgb_pp)
+
+# Random Forest - out-of-the-box
+mod_rf <- train(x,y,data=myTraining,method = 'rf')
+accu_rf <- round(max(mod_rf$results$Accuracy)*100,2)
+cfm_rf <- confusionMatrix(mod_rf)
+
+# Random Forest with both preprocessing and cross-validation  
+mod_rf_all <- train(x,y,data=myTraining,method = 'rf',
+                   trControl = tc,
+                   preProcess=c('center','scale'))
+accu_rf_all <- round(max(mod_rf_all$results$Accuracy)*100,2)
+cfm_rf_all <- confusionMatrix(mod_rf_all)
+
+# Return to single processing
+stopCluster(cluster)
+registerDoSEQ()
+```
+Listing the accuracies for comparison:
+
+```{r accuracies}
+accuracies <- rbind(accu_xgb,accu_xgb_pp,accu_rf,accu_rf_all)
+print(accuracies)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Making the prediction for the quiz
+```{r predictions}
+pred_xgb <- predict(mod_xgb,myTesting)
+pred_xgb_pp <- predict(mod_xgb_pp,myTesting)
+pred_rf <- predict(mod_rf,myTesting)
+pred_rf_all <- predict(mod_rf_all,myTesting)
+```
+
+Listing the predictions for comparison
+```{r predictions}
+# All 4 predictions results in the same output, hence using this for validation
+# in the quiz, and resulting in a 100% score
+preds <- rbind(as.character(pred_xbg),as.character(pred_xbg_pp),
+               as.character(pred_rf),as.character(pred_rf_all))
+print(preds)
+```
+
+This concludes the assignment
