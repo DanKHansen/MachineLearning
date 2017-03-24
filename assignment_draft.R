@@ -44,33 +44,29 @@ myTesting <- myTesting[,tmp_test_names]
 myTraining <- myTraining[,-c(1:7)]
 myTesting <- myTesting[,-c(1:7)]
 
-# using the model-syntax has bad performance. hence using x/y syntax
-x <- myTraining[,-52]
-y <- myTraining[,"classe"]
-
 set.seed(223344)
 
 # config trainControl object
 tc <- trainControl(method = 'cv', number = 10, allowParallel = T)
 
 # Extended Gradient Boost - linear
-mod_xgb <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc)
+mod_xgb <- train(classe ~.,data=myTraining, method='xgbLinear', trControl= tc)
 accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
 cfm_xgb <- confusionMatrix(mod_xgb)
 
 # Extended Gradient Boost - linear - Preproc
-mod_xgb_pp <- train(x,y,data=myTraining, method='xgbLinear', trControl= tc,
+mod_xgb_pp <- train(classe ~.,data=myTraining, method='xgbLinear', trControl= tc,
                  preProcess = c('center','scale'))
 accu_xgb_pp <- round(max(mod_xgb_pp$results$Accuracy)*100,2)
 cfm_xgb_pp <- confusionMatrix(mod_xgb_pp)
 
 # Random Forest - out-of-the-box
-mod_rf <- train(x,y,data=myTraining,method = 'rf')
+mod_rf <- train(classe ~.,data=myTraining,method = 'rf')
 accu_rf <- round(max(mod_rf$results$Accuracy)*100,2)
 cfm_rf <- confusionMatrix(mod_rf)
 
 # Random Forest with both preprocessing and cross-validation  
-mod_rf_all <- train(x,y,data=myTraining,method = 'rf',
+mod_rf_all <- train(classe ~.,data=myTraining,method = 'rf',
                    trControl = tc,
                    preProcess=c('center','scale'))
 accu_rf_all <- round(max(mod_rf_all$results$Accuracy)*100,2)
