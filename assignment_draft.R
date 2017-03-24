@@ -78,12 +78,13 @@ registerDoSEQ()
 
 #Prediction (for use in Quiz)
 pred_xgb <- predict(mod_xgb,myTesting)
+pred_xgb_pp <- predict(mod_xgb_pp,myTesting)
 pred_rf <- predict(mod_rf,myTesting)
 pred_rf_all <- predict(mod_rf_all,myTesting)
 
-accuracies <- rbind(accu_rf,accu_rf_all,accu_xgb)
+accuracies <- rbind(accu_xgb,accu_xgb_pp,accu_rf,accu_rf_all)
 View(accuracies)
 # All 3 predictions results in the same output, hence using this for validation
 # in the quiz, and resulting in a 100% score
-preds <- rbind(as.character(pred_xbg),as.character(pred_rf),as.character(pred_rf_all))
+preds <- rbind(as.character(pred_xgb),as.character(pred_xgb_pp),as.character(pred_rf),as.character(pred_rf_all))
 View(preds)

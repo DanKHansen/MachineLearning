@@ -137,7 +137,7 @@ Listing the predictions for comparison
 ```{r list_predictions}
 # All 4 predictions results in the same output, hence using this for validation
 # in the quiz, and resulting in a 100% score
-preds <- rbind(as.character(pred_xbg),as.character(pred_xbg_pp),
+preds <- rbind(as.character(pred_xgb),as.character(pred_xgb_pp),
                as.character(pred_rf),as.character(pred_rf_all))
 print(preds)
 ```
