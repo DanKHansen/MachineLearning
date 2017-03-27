@@ -50,6 +50,7 @@ And the we load the datasets
 testing <- read.csv('pml-testing.csv',na.strings = c('','NA','#DIV/0!'))
 training <- read.csv('pml-training.csv',na.strings = c('','NA','#DIV/0!'))
 ```
+
 Cleaning out the dataset for use in our algorithms
 
 ```{r clean}
@@ -74,6 +75,7 @@ myTraining <- myTraining[,-c(1:7)]
 myTesting <- myTesting[,-c(1:7)]
 
 ```
+
 To be able to replicate the resuls we set the seed:
 
 ```{r seed}
@@ -84,13 +86,15 @@ And now to the modelling
 First we configure the trainControl object:
 
 ```{r trainctrlcfg}
-tc <- trainControl(method = 'cv', number = 10, allowParallel = T)
+#As this is very CPU-heavy, we'll reduce the load/accuracy by lowering the number of
+#folds to 4 (I've tried 10 but each model takes about 4 hours on a i5 laptop with 8 GB Ram)
+tc <- trainControl(method = 'cv', number = 4, allowParallel = T)
 ```
 And then we try 4 different models within the caret package
 We'll let caret take care of the cross-validation and preprocessing
 each chunk includes the model, the accuracy and a confusionmatrix
 
-```{r models, eval=FALSE, include=TRUE}
+```{r models}
 # Extended Gradient Boost - linear
 mod_xgb <- train(classe ~.,data=myTraining, method='xgbLinear', trControl= tc)
 accu_xgb <- round(max(mod_xgb$results$Accuracy)*100,2)
@@ -118,13 +122,20 @@ cfm_rf_all <- confusionMatrix(mod_rf_all)
 stopCluster(cluster)
 registerDoSEQ()
 ```
-Listing the accuracies for comparison:
+
+Listing the accuracies and Out-of-Sample errors for comparison:
 
 ```{r accuracies}
 accuracies <- rbind(accu_xgb,accu_xgb_pp,accu_rf,accu_rf_all)
-print(accuracies)
+
+#Adding the Out-Of-Sample errors to expect for each model
+matrix <- cbind(accuracies,c(100-accu_xgb,100-accu_xgb_pp,100-accu_rf,100-accu_rf_all))
+colnames(matrix) <- c('Accuracy','OOS error')
+print(matrix)
 ```
+
 Listing the confusion matrices:
+
 ```{r}
 print(round(cfm_xgb$table,2))
 print(round(cfm_xgb_pp$table,2))
@@ -132,9 +143,8 @@ print(round(cfm_rf$table,2))
 print(round(cfm_rf_all$table,2))
 ```
 
-
-
 Making the prediction for the quiz
+
 ```{r predictions}
 pred_xgb <- predict(mod_xgb,myTesting)
 pred_xgb_pp <- predict(mod_xgb_pp,myTesting)
@@ -143,12 +153,16 @@ pred_rf_all <- predict(mod_rf_all,myTesting)
 ```
 
 Listing the predictions for comparison
+
 ```{r list_predictions}
 # All 4 predictions results in the same output, hence using this for validation
 # in the quiz, and resulting in a 100% score
 preds <- rbind(as.character(pred_xgb),as.character(pred_xgb_pp),
                as.character(pred_rf),as.character(pred_rf_all))
-print(preds)
+
+# I will not print these here, but it can be done by uncommenting the following code
+
+# print(preds)
 ```
 
 This concludes the assignment
